@@ -1,3 +1,3 @@
-# Changelog for haskellsdl
+# Changelog for Taskell
 
 ## Unreleased changes

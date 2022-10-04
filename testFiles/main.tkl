@@ -1,0 +1,14 @@
+file = "example.csv"
+
+## Describing schema
+{ 
+    file:
+        Int
+        Float
+        String
+}
+
+file[0]
+    - +1 |> *2 |
+    - -1 | 
+    {} plot

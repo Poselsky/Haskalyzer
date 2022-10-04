@@ -1,0 +1,6 @@
+{
+    let a = file.csv:
+        Int
+        Float
+        String
+}
