@@ -34,7 +34,8 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      HUnit ==1.6.2.0
+    , base >=4.7 && <5
     , filepath ==1.4.2.1
     , indents ==0.5.0.1
     , mtl ==2.2.2
@@ -50,7 +51,8 @@ executable Taskell-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      Taskell
+      HUnit ==1.6.2.0
+    , Taskell
     , base >=4.7 && <5
     , filepath ==1.4.2.1
     , indents ==0.5.0.1
@@ -63,12 +65,14 @@ test-suite Taskell-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      Parsing.Helpers
       Paths_Taskell
   hs-source-dirs:
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      Taskell
+      HUnit ==1.6.2.0
+    , Taskell
     , base >=4.7 && <5
     , filepath ==1.4.2.1
     , indents ==0.5.0.1

@@ -26,6 +26,7 @@ dependencies:
 - indents == 0.5.0.1
 - mtl == 2.2.2
 - filepath == 1.4.2.1
+- HUnit == 1.6.2.0
 
 library:
   source-dirs: src

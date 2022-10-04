@@ -1,2 +1,27 @@
+import Parsing.Helpers (indentParser)
+import Taskell.Schema (schemaParser)
+import Test.HUnit
+import Data.Either (isRight, isLeft)
+
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = do 
+    runTestTT schemaTest
+    return ()
+
+
+schemaTestInput :: String
+schemaTestInput = 
+    unlines [
+        "{",
+        "let a = file.csv :",
+        "   Int",
+        "   String",
+        "   Float",
+        "}"
+    ]
+
+schemaTest = TestCase ( do
+        let parseResult = indentParser schemaParser schemaTestInput
+        assertBool ("General schema parser: \n\t" ++ show parseResult) $ isRight parseResult
+    )

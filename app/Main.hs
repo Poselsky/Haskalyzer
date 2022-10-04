@@ -9,15 +9,6 @@ import Taskell.Schema (schemaParser)
 import qualified Text.Parsec.Token as Tok
 import System.Environment
 
-
-input_text = unlines 
-    [
-        "file:",
-        "  String",
-        "  Int"
-    ]
-
-
 toplevelP :: IParser [Expr]
 toplevelP = do 
     Tok.whiteSpace taskellLexer
