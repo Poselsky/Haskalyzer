@@ -42,6 +42,7 @@ packages:
 #
 extra-deps: 
 - parsec-3.1.15.1@sha256:8c7a36aaadff12a38817fc3c4ff6c87e3352cffd1a58df640de7ed7a97ad8fa3
+- Cabal-3.6.3.0@sha256:ff97c442b0c679c1c9876acd15f73ac4f602b973c45bde42b43ec28265ee48f4,12459
 
 # Override default flag values for local packages and extra-deps
 # flags: {}
