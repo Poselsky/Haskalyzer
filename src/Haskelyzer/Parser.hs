@@ -1,4 +1,4 @@
-module Taskell.Parser where
+module Haskelyzer.Parser where
 
 import Text.Parsec hiding (string)
 import Text.Parsec.String (Parser)
@@ -6,11 +6,11 @@ import Text.Parsec.String (Parser)
 import qualified Text.Parsec.Expr as Ex
 import qualified Text.Parsec.Token as Tok
 
-import Taskell.Lexer
+import Haskelyzer.Lexer
 import Text.Parsec.Indent
 import Text.Parsec.Token (GenTokenParser(stringLiteral))
-import Taskell.Lexer (stringLit)
-import Taskell.Schema (schemaParser)
+import Haskelyzer.Lexer (stringLit)
+import Haskelyzer.Schema (schemaParser)
 import qualified Data.Text as T
 
 binary s f assoc = Ex.Infix (reservedOp s >> return (BinOp f)) assoc

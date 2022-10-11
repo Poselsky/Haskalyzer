@@ -1,5 +1,5 @@
 import Parsing.Helpers (indentParser)
-import Taskell.Schema (schemaParser)
+import Haskelyzer.Schema (schemaParser)
 import Test.HUnit
 import Data.Either (isRight, isLeft)
 

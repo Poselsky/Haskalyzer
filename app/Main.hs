@@ -1,17 +1,18 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Taskell.Parser
+import Haskelyzer.Parser
 import Text.Parsec
-import Taskell.Lexer
+import Haskelyzer.Lexer
 import Text.Parsec.Indent
-import Taskell.Schema (schemaParser)
+import Haskelyzer.Schema (schemaParser)
 import qualified Text.Parsec.Token as Tok
 import System.Environment
+import Language.Haskell.Interpreter (Interpreter, loadModules)
 
 toplevelP :: IParser [Expr]
 toplevelP = do 
-    Tok.whiteSpace taskellLexer
+    Tok.whiteSpace haskelyzerLexer
     def <- many $ do 
         s <- try schemaParser 
         try $ many newline
@@ -23,6 +24,10 @@ toplevelP = do
 parseToplevelP :: String -> Either ParseError [Expr]
 parseToplevelP input = 
     runIndent $ runParserT toplevelP () "<stdin>" input
+
+haskellScriptBackingFile:: FilePath -> Interpreter ()
+haskellScriptBackingFile pathToBackingFile = do
+    loadModules [pathToBackingFile]
 
 main :: IO ()
 main = do

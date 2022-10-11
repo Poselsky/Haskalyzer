@@ -1,4 +1,4 @@
-module Taskell.Lexer where
+module Haskelyzer.Lexer where
 import Control.Monad.State
 
 import qualified Text.Parsec.Token as Tok
@@ -11,8 +11,8 @@ import Text.Parsec.Char
 import qualified Text.Parsec.Language as Tok
 
 
-taskellLexer :: Tok.GenTokenParser String () (IndentT Identity)
-taskellLexer =
+haskelyzerLexer :: Tok.GenTokenParser String () (IndentT Identity)
+haskelyzerLexer =
   Tok.makeTokenParser Tok.emptyDef 
     { 
         Tok.commentStart = "#{",
@@ -40,8 +40,8 @@ data VarNamePath = VarNamePath
 
 instance Ord VarNamePath where
   compare a b 
-    | filepathLength a > filepathLength b = LT
-    | filepathLength b > filepathLength a = GT
+    | filepathLength a > filepathLength b = GT
+    | filepathLength b > filepathLength a = LT
     | otherwise                           = EQ
     where
       filepathLength = length . filePath
@@ -79,31 +79,31 @@ data DataExpr =
 type IParser a = IndentParser String () a
 
 integer :: IParser Integer
-integer = Tok.integer taskellLexer
+integer = Tok.integer haskelyzerLexer
 
 float :: IParser Double
-float = Tok.float taskellLexer
+float = Tok.float haskelyzerLexer
 
 parens :: IParser a -> IParser a
-parens = Tok.parens taskellLexer
+parens = Tok.parens haskelyzerLexer
 
 commaSep :: IParser a -> IParser [a]
-commaSep = Tok.commaSep taskellLexer
+commaSep = Tok.commaSep haskelyzerLexer
 
 semiSep :: IParser a -> IParser [a]
-semiSep = Tok.semiSep taskellLexer
+semiSep = Tok.semiSep haskelyzerLexer
 
 identifier :: IParser String
-identifier = Tok.identifier taskellLexer
+identifier = Tok.identifier haskelyzerLexer
 
 reserved :: String -> IParser ()
-reserved = Tok.reserved taskellLexer
+reserved = Tok.reserved haskelyzerLexer
 
 reservedOp :: String -> IParser ()
-reservedOp = Tok.reservedOp taskellLexer
+reservedOp = Tok.reservedOp haskelyzerLexer
 
 stringLit:: IParser String
-stringLit = Tok.stringLiteral taskellLexer
+stringLit = Tok.stringLiteral haskelyzerLexer
 
 add:: IParser Expr
 add = do

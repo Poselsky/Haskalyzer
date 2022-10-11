@@ -25,10 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Haskelyzer.Lexer
+      Haskelyzer.Parser
+      Haskelyzer.Schema
       Lib
-      Taskell.Lexer
-      Taskell.Parser
-      Taskell.Schema
   other-modules:
       Paths_Taskell
   hs-source-dirs:

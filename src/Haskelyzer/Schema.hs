@@ -1,5 +1,5 @@
-module Taskell.Schema where
-import Taskell.Lexer
+module Haskelyzer.Schema where
+import Haskelyzer.Lexer
 import Text.Parsec (between)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)
