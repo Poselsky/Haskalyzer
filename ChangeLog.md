@@ -1,3 +1,3 @@
-# Changelog for Taskell
+# Changelog for Haskelyzer
 
 ## Unreleased changes

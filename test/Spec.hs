@@ -14,10 +14,10 @@ schemaTestInput :: String
 schemaTestInput = 
     unlines [
         "{",
-        "let a = file.csv :",
-        "   Int",
-        "   String",
-        "   Float",
+        "   let a = file.csv :",
+        "       Int",
+        "       String",
+        "       Float",
         "}"
     ]
 
