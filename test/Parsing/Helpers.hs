@@ -1,6 +1,6 @@
 module Parsing.Helpers where
 
-import Haskelyzer.Lexer (Expr, IParser)
+import HaskelyzerAST.Lexer (Expr, IParser)
 import Text.Parsec (ParseError)
 import Text.Parsec.Indent (runIndent)
 import Text.Parsec.Prim (runParserT)

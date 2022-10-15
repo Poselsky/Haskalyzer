@@ -1,5 +1,5 @@
-module Haskelyzer.Schema where
-import Haskelyzer.Lexer
+module HaskelyzerAST.Schema where
+import HaskelyzerAST.Lexer
 import Text.Parsec (between)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)

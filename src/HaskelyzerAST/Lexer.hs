@@ -1,4 +1,4 @@
-module Haskelyzer.Lexer where
+module HaskelyzerAST.Lexer where
 import Control.Monad.State
 
 import qualified Text.Parsec.Token as Tok
@@ -28,8 +28,8 @@ haskelyzerLexer =
         Tok.caseSensitive = True
     }
     where
-        ops = ["+","*","-",";"]
-        names = ["def","extern"]
+        ops = ["+","*","-",";", "->"]
+        names = ["let"]
 
 type Name = String
 data VarNamePath = VarNamePath 
@@ -63,8 +63,8 @@ data Expr
   = DataExpr DataExpr 
   | BinOp BinOp Expr Expr
   | UnaryOp UnaryOp Expr 
-  | Call Name [Expr]
-  | Function Name [Expr] Expr
+  | Function Name [Name] 
+  | Var Name [Expr]
   | Extern Name [Expr]
   | Schema VarNamePath [DataExpr]
   deriving (Eq, Ord, Show)
@@ -72,7 +72,6 @@ data Expr
 data DataExpr = 
     Float Double
     | Int Integer
-    | Var String
     | String String
     deriving (Eq, Ord, Show)
 
@@ -108,4 +107,4 @@ stringLit = Tok.stringLiteral haskelyzerLexer
 add:: IParser Expr
 add = do
   string "add"
-  return $ Function "add" [DataExpr $ Int 0] $ DataExpr $ Int 0
+  return $ Function "add" ["a"] 

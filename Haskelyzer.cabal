@@ -25,9 +25,10 @@ source-repository head
 
 library
   exposed-modules:
-      Haskelyzer.Lexer
-      Haskelyzer.Parser
-      Haskelyzer.Schema
+      HaskelyzerAST.Function
+      HaskelyzerAST.Lexer
+      HaskelyzerAST.Parser
+      HaskelyzerAST.Schema
       Lib
   other-modules:
       Paths_Haskelyzer

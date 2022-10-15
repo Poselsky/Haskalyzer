@@ -1,11 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Main where
 
-import Haskelyzer.Parser
+import HaskelyzerAST.Parser
 import Text.Parsec
-import Haskelyzer.Lexer
+import HaskelyzerAST.Lexer
 import Text.Parsec.Indent
-import Haskelyzer.Schema (schemaParser)
+import HaskelyzerAST.Schema (schemaParser)
 import qualified Text.Parsec.Token as Tok
 import System.Environment
 import Language.Haskell.Interpreter (Interpreter, loadModules)
