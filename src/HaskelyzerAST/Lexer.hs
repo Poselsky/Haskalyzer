@@ -59,11 +59,14 @@ data UnaryOp
     | Exponent
     deriving (Eq, Ord, Show)
 
+data HaskelyzerFunction = HaskelyzerFunction Name [Name]
+  deriving (Show, Ord, Eq)
+
 data Expr
   = DataExpr DataExpr 
   | BinOp BinOp Expr Expr
   | UnaryOp UnaryOp Expr 
-  | Function Name [Name] 
+  | FunctionExpr HaskelyzerFunction 
   | Var Name [Expr]
   | Extern Name [Expr]
   | Schema VarNamePath [DataExpr]
@@ -103,8 +106,3 @@ reservedOp = Tok.reservedOp haskelyzerLexer
 
 stringLit:: IParser String
 stringLit = Tok.stringLiteral haskelyzerLexer
-
-add:: IParser Expr
-add = do
-  string "add"
-  return $ Function "add" ["a"] 

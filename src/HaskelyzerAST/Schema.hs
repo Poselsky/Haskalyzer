@@ -1,10 +1,16 @@
 module HaskelyzerAST.Schema where
 import HaskelyzerAST.Lexer
+    ( IParser,
+      DataExpr(..),
+      Expr(Schema),
+      VarNamePath(..),
+      identifier )
 import Text.Parsec (between)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)
 import Text.Parsec.Combinator
-import Text.Parsec.Prim
+    ( choice, between, manyTill, optional )
+import Text.Parsec.Prim ( many )
 import Text.Parsec (spaces, newline)
 import Text.Parsec (alphaNum, endOfLine, anyChar)
 import System.FilePath (isValid)
