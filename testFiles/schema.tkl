@@ -1,4 +1,9 @@
-let a = lel a b -> ok
+{
+    let a = "asda" :
+        Int
+        String
+}
 
+let a = lel a b -> ok;
 
-
+let b = lel;

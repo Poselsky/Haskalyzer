@@ -11,8 +11,10 @@ functionParser = do
     spaces
     x <- optionMaybe $ lookAhead letter 
     case x of
-      Nothing -> 
-            return $ HaskelyzerFunction functionName []
+      Nothing -> do
+            let f = HaskelyzerFunction functionName []
+            reservedOp ";"
+            return f
       Just x1 -> do
             args <- identifier `sepBy1` spaces 
             return $ HaskelyzerFunction functionName args

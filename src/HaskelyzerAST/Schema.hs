@@ -4,7 +4,7 @@ import HaskelyzerAST.Lexer
       DataExpr(..),
       Expr(Schema),
       VarNamePath(..),
-      identifier )
+      identifier, reservedOp, reserved, stringLit )
 import Text.Parsec (between)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)
@@ -44,10 +44,13 @@ letVarNameParser:: IParser VarNamePath
 letVarNameParser = do
     indentation >> spaces
 
-    string "let"
+    reserved "let"
     varName <- between spaces spaces identifier 
-    char '='
-    fileName <- between spaces spaces $ manyTill anyChar (char ':')
+    reservedOp "="
+    spaces
+    fileName <- stringLit
+    spaces
+    reservedOp ":"
 
     guard $ isValid fileName
 

@@ -29,9 +29,10 @@ something ast = do
         traverse_ (\x -> do
                 let converted = somethingSomething x
                 liftIO $ print converted
-                eval converted
+                -- eval converted
             ) ast
     return ()
+
 runInterpreterRWS:: [Expr] -> IO ()
 runInterpreterRWS ast = do
 

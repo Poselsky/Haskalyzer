@@ -24,13 +24,11 @@ haskelyzerLexer =
         Tok.identLetter = letter,
         Tok.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
         Tok.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
-        -- Tok.opStart = oneOf "", 
-        -- Tok.opLetter = oneOf "",
         Tok.nestedComments = True,
         Tok.caseSensitive = True
     }
     where
-        ops = ["+","*","-",";", "->"]
+        ops = ["+","*","-",";", "->" , ":"]
         names = ["let"]
 
 type Name = String

@@ -29,6 +29,7 @@ library
       HaskelyzerAST.Lexer
       HaskelyzerAST.Parser
       HaskelyzerAST.Schema
+      HaskelyzerCSV.Parser
       HaskelyzerInterpreter.FunctionInterpreter
       HaskelyzerInterpreter.InterpreterState
       Lib

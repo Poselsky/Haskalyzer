@@ -14,10 +14,10 @@ import HaskelyzerAST.Function (functionParser, variableParser)
 toplevelP :: IParser [Expr]
 toplevelP = do 
     def <- many $ do 
-        s <- factor 
+        try $ many newline
+        s <- expr 
         try $ many newline
         return s
-    -- reservedOp ";"
     eof
     return def
 
@@ -33,6 +33,9 @@ main :: IO ()
 main = do
     t <- readFile "./testFiles/schema.tkl"
     let ast = parseToplevelP t
+
+    print ast
+
     case ast of Right e -> runInterpreterRWS e 
-                Left e -> print ast 
+                Left e -> return () 
     return ()

@@ -21,8 +21,6 @@ table = [[binary "*" Times Ex.AssocLeft,
         ,[binary "+" Plus Ex.AssocLeft,
           binary "-" Minus Ex.AssocLeft]]
 
--- table = []
-
 int :: IParser Expr
 int = do
   n <- integer
@@ -33,37 +31,16 @@ floating = do
   n <- float
   return $ DataExpr $ Float n
 
-expr :: IParser Expr
-expr = Ex.buildExpressionParser table factor
-
 string:: IParser Expr
 string = do 
     stringVal <- stringLit
     return $ DataExpr $ String stringVal
+
+expr :: IParser Expr
+expr = Ex.buildExpressionParser table factor
 
 factor :: IParser Expr
 factor = 
       try schemaParser 
       <|> try variableParser
       <|> parens factor 
-
-contents :: IParser a -> IParser a
-contents p = do
-  r <- parserTraced "kek" p
-  eof
-  return r
-
-toplevel :: IParser [Expr]
-toplevel = many $ do
-    def <- factor 
-    endOfLine
-    return def
-
-parseExpr :: String -> Either ParseError Expr
-parseExpr = 
-    runIndentParser (contents expr) () "<stdin>"
-
-parseToplevel :: String -> Either ParseError [Expr]
-parseToplevel = 
-    runIndentParser (contents toplevel) () "<stdin>"
-
