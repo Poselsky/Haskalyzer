@@ -12,6 +12,7 @@ import Text.Parsec.Token (GenTokenParser(stringLiteral))
 import HaskelyzerAST.Lexer (stringLit)
 import HaskelyzerAST.Schema (schemaParser)
 import qualified Data.Text as T
+import HaskelyzerAST.Function (variableParser)
 
 binary s f assoc = Ex.Infix (reservedOp s >> return (BinOp f)) assoc
 
@@ -19,6 +20,8 @@ table = [[binary "*" Times Ex.AssocLeft,
           binary "/" Divide Ex.AssocLeft]
         ,[binary "+" Plus Ex.AssocLeft,
           binary "-" Minus Ex.AssocLeft]]
+
+-- table = []
 
 int :: IParser Expr
 int = do
@@ -33,30 +36,27 @@ floating = do
 expr :: IParser Expr
 expr = Ex.buildExpressionParser table factor
 
-
 string:: IParser Expr
 string = do 
     stringVal <- stringLit
     return $ DataExpr $ String stringVal
 
 factor :: IParser Expr
-factor = try floating
-      <|> try int
-      <|> try string
-      <|> try schemaParser 
-      <|> parens expr
+factor = 
+      try schemaParser 
+      <|> try variableParser
+      <|> parens factor 
 
 contents :: IParser a -> IParser a
 contents p = do
-  r <- p
+  r <- parserTraced "kek" p
   eof
   return r
 
 toplevel :: IParser [Expr]
 toplevel = many $ do
-    def <- expr 
-    -- reservedOp ";"
-    newline
+    def <- factor 
+    endOfLine
     return def
 
 parseExpr :: String -> Either ParseError Expr

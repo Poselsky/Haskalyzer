@@ -30,6 +30,7 @@ library
       HaskelyzerAST.Parser
       HaskelyzerAST.Schema
       HaskelyzerInterpreter.FunctionInterpreter
+      HaskelyzerInterpreter.InterpreterState
       Lib
   other-modules:
       Paths_Haskelyzer

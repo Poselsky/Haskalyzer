@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import HaskelyzerAST.Parser
@@ -9,12 +8,13 @@ import HaskelyzerAST.Schema (schemaParser)
 import qualified Text.Parsec.Token as Tok
 import System.Environment
 import Language.Haskell.Interpreter (Interpreter, loadModules)
+import HaskelyzerInterpreter.InterpreterState (runInterpreterRWS)
+import HaskelyzerAST.Function (functionParser, variableParser)
 
 toplevelP :: IParser [Expr]
 toplevelP = do 
-    Tok.whiteSpace haskelyzerLexer
     def <- many $ do 
-        s <- try schemaParser 
+        s <- factor 
         try $ many newline
         return s
     -- reservedOp ";"
@@ -32,4 +32,7 @@ haskellScriptBackingFile pathToBackingFile = do
 main :: IO ()
 main = do
     t <- readFile "./testFiles/schema.tkl"
-    print $ parseToplevelP t 
+    let ast = parseToplevelP t
+    case ast of Right e -> runInterpreterRWS e 
+                Left e -> print ast 
+    return ()

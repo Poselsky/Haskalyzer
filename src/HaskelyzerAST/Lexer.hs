@@ -24,6 +24,8 @@ haskelyzerLexer =
         Tok.identLetter = letter,
         Tok.opStart = oneOf ":!#$%&*+./<=>?@\\^|-~",
         Tok.opLetter = oneOf ":!#$%&*+./<=>?@\\^|-~",
+        -- Tok.opStart = oneOf "", 
+        -- Tok.opLetter = oneOf "",
         Tok.nestedComments = True,
         Tok.caseSensitive = True
     }
@@ -67,7 +69,7 @@ data Expr
   | BinOp BinOp Expr Expr
   | UnaryOp UnaryOp Expr 
   | FunctionExpr HaskelyzerFunction 
-  | Var Name [Expr]
+  | Var Name [HaskelyzerFunction]
   | Extern Name [Expr]
   | Schema VarNamePath [DataExpr]
   deriving (Eq, Ord, Show)
