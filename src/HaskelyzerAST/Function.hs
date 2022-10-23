@@ -1,37 +1,26 @@
 module HaskelyzerAST.Function where
-import HaskelyzerAST.Lexer (IParser, identifier, reserved, reservedOp, Expr (FunctionExpr, Var), HaskelyzerFunction (HaskelyzerFunction))
-import Text.Parsec (many, sepBy, newline, spaces, between, optional, option,  parserTrace, parserTraced, lookAhead, optionMaybe, notFollowedBy, manyTill, eof, try, char, (<|>), endOfLine, sepEndBy1, sepBy1, anyChar, letter, alphaNum)
-import Control.Monad ( guard )
+import HaskelyzerAST.Lexer (IParser, identifier, reserved, reservedOp, Expr (FunctionExpr, Var), HaskelyzerFunction (HaskelyzerFunction), whiteSp)
+import Text.Parsec (many, sepBy, newline, spaces, between, optional, option,  parserTrace, parserTraced, lookAhead, optionMaybe, notFollowedBy, manyTill, eof, try, char, (<|>), endOfLine, sepEndBy1, sepBy1, anyChar, letter, alphaNum, tab)
+import Control.Monad ( guard, void )
 import Text.Parsec.Char (space)
 import Debug.Trace (trace)
+
+tabOrSpaces = many (tab <|> char ' ') 
 
 functionParser:: IParser HaskelyzerFunction 
 functionParser = do
     functionName <- identifier 
-    spaces
-    x <- optionMaybe $ lookAhead letter 
-    case x of
-      Nothing -> do
-            let f = HaskelyzerFunction functionName []
-            reservedOp ";"
-            return f
-      Just x1 -> do
-            args <- identifier `sepBy1` spaces 
-            return $ HaskelyzerFunction functionName args
+    try tabOrSpaces
+    args <- identifier `sepBy` tabOrSpaces 
+    return $ HaskelyzerFunction functionName args
 
 variableParser:: IParser Expr
 variableParser = do
     reserved "let"
-    name <- between spaces spaces identifier
-    reservedOp "=" >> spaces 
+    name <- between tabOrSpaces tabOrSpaces identifier
+    reservedOp "=" >> tabOrSpaces 
 
-    functions <- many $ try pipeline <|> functionParser
+    functions <- functionParser `sepBy1` (between tabOrSpaces tabOrSpaces $ reservedOp "->")
     guard (not $ null functions) 
 
     return $ Var name functions
-
-        where 
-            pipeline = do
-                f <- functionParser 
-                between spaces spaces $ reservedOp "->" 
-                return f

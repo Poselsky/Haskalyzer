@@ -106,3 +106,6 @@ reservedOp = Tok.reservedOp haskelyzerLexer
 
 stringLit:: IParser String
 stringLit = Tok.stringLiteral haskelyzerLexer
+
+whiteSp:: IParser ()
+whiteSp = Tok.whiteSpace haskelyzerLexer

@@ -4,6 +4,6 @@
         String
 }
 
-let a = lel a b -> ok;
+let a = lel a b -> ok
 
-let b = lel;
+let b = lel
