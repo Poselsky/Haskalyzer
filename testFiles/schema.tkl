@@ -1,9 +1,5 @@
 {
-    let a = "asda" :
+    let a = "asda.csv" :
         Int
         String
 }
-
-let a = lel a b -> ok
-
-let b = lel

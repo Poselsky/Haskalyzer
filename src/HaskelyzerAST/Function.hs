@@ -5,22 +5,22 @@ import Control.Monad ( guard, void )
 import Text.Parsec.Char (space)
 import Debug.Trace (trace)
 
-tabOrSpaces = many (tab <|> char ' ') 
+tabOrSpaces = many (tab <|> char ' ')
 
-functionParser:: IParser HaskelyzerFunction 
+functionParser:: IParser HaskelyzerFunction
 functionParser = do
-    functionName <- identifier 
+    functionName <- identifier
     try tabOrSpaces
-    args <- identifier `sepBy` tabOrSpaces 
+    args <- identifier `sepBy` tabOrSpaces
     return $ HaskelyzerFunction functionName args
 
 variableParser:: IParser Expr
 variableParser = do
     reserved "let"
     name <- between tabOrSpaces tabOrSpaces identifier
-    reservedOp "=" >> tabOrSpaces 
+    reservedOp "=" >> tabOrSpaces
 
-    functions <- functionParser `sepBy1` (between tabOrSpaces tabOrSpaces $ reservedOp "->")
-    guard (not $ null functions) 
+    functions <- functionParser `sepBy1` between tabOrSpaces tabOrSpaces (reservedOp "->")
+    guard (not $ null functions)
 
     return $ Var name functions

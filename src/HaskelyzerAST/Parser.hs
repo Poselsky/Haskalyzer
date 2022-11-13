@@ -44,3 +44,17 @@ factor =
       try schemaParser 
       <|> try variableParser
       <|> parens factor 
+
+toplevelP :: IParser [Expr]
+toplevelP = do 
+    def <- many $ do 
+        try $ many newline
+        s <- expr 
+        try $ many newline
+        return s
+    eof
+    return def
+
+parseToplevelP :: String -> Either ParseError [Expr]
+parseToplevelP input = 
+    runIndent $ runParserT toplevelP () "<stdin>" input

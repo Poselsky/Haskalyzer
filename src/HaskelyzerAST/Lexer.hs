@@ -38,6 +38,9 @@ data VarNamePath = VarNamePath
     , filePath:: FilePath
   } deriving (Show, Eq)
 
+data Schema = Schema VarNamePath [DataExpr]
+  deriving (Show, Eq, Ord)
+
 instance Ord VarNamePath where
   compare a b 
     | filepathLength a > filepathLength b = GT
@@ -69,7 +72,7 @@ data Expr
   | FunctionExpr HaskelyzerFunction 
   | Var Name [HaskelyzerFunction]
   | Extern Name [Expr]
-  | Schema VarNamePath [DataExpr]
+  | SchemaExpr Schema 
   deriving (Eq, Ord, Show)
 
 data DataExpr = 

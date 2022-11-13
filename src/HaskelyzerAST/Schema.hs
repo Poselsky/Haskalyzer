@@ -2,9 +2,9 @@ module HaskelyzerAST.Schema where
 import HaskelyzerAST.Lexer
     ( IParser,
       DataExpr(..),
-      Expr(Schema),
+      Expr(SchemaExpr),
       VarNamePath(..),
-      identifier, reservedOp, reserved, stringLit )
+      identifier, reservedOp, reserved, stringLit, Schema (Schema) )
 import Text.Parsec (between)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)
@@ -27,7 +27,7 @@ schemaParser = do
     optional $ many newline
 
     fileSchema <- withBlock
-        (\filename rowTypes -> Schema filename $ map rowTypeToDataExpr rowTypes)
+        (\filename rowTypes -> SchemaExpr $ Schema filename $ map rowTypeToDataExpr rowTypes)
         letVarNameParser
         (
             do
