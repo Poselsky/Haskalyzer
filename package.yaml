@@ -31,6 +31,7 @@ dependencies:
 - vector == 0.12.3.1
 - template-haskell == 2.17.0.0
 - async == 2.2.4
+- containers == 0.6.4.1
 
 library:
   source-dirs: src

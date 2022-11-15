@@ -28,7 +28,7 @@ haskelyzerLexer =
         Tok.caseSensitive = True
     }
     where
-        ops = ["+","*","-",";", "->" , ":"]
+        ops = ["+","*","-",";", "->" , ":", ","]
         names = ["let"]
 
 type Name = String
@@ -38,7 +38,7 @@ data VarNamePath = VarNamePath
     , filePath:: FilePath
   } deriving (Show, Eq)
 
-data Schema = Schema VarNamePath [DataExpr]
+data Schema = Schema VarNamePath [(Maybe String, DataExpr)]
   deriving (Show, Eq, Ord)
 
 instance Ord VarNamePath where
@@ -91,6 +91,9 @@ float = Tok.float haskelyzerLexer
 
 parens :: IParser a -> IParser a
 parens = Tok.parens haskelyzerLexer
+
+braces:: IParser a -> IParser a
+braces = Tok.braces haskelyzerLexer
 
 commaSep :: IParser a -> IParser [a]
 commaSep = Tok.commaSep haskelyzerLexer

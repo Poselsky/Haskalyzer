@@ -1,5 +1,5 @@
 {
-    let a = "asda.csv" :
+    let a = "C:/Users/olegm/Desktop/Haskalyzer/testFiles/example.csv" :
         Int
         String
 }

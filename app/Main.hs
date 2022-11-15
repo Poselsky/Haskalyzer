@@ -2,13 +2,14 @@
 module Main where
 import HaskelyzerTemplate.MainTemplate
 
-a = 3
-lel b = b + 1
+-- a = 3
+-- lel b = b + 1
 
 $(generateSDL "./testFiles/schema.tkl")
 
 main :: IO ()
 main = do
+    putStrLn $ show a
     -- t <- readFile "./testFiles/schema.tkl"
     -- let ast = parseToplevelP t
 
@@ -16,5 +17,5 @@ main = do
 
     -- case ast of Right e -> runInterpreterRWS e 
     --             Left e -> return () 
-    print $ b 3
+    -- print $ b 3
     return ()
