@@ -1,4 +1,6 @@
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
 module HaskelyzerTemplate.MainTemplate where
 import Language.Haskell.TH
     ( mkName,
@@ -11,7 +13,7 @@ import Language.Haskell.TH
       Clause(Clause),
       Name,
       Dec(FunD),
-      Body(NormalB), Lit (StringL) )
+      Body(NormalB), Lit (StringL, IntegerL, RationalL), reify )
 import HaskelyzerAST.Parser
 import GHC.IO.Handle (hSetBuffering, BufferMode (NoBuffering))
 import GHC.IO.Handle.FD (stdout, stderr)
@@ -28,6 +30,23 @@ import Data.Data (Typeable, typeOf)
 import qualified Data.Vector as V
 
 type VectorMatrix a = V.Vector (V.Vector a)
+
+class ToExp a where
+    toExp:: a -> Exp
+
+instance ToExp Double where
+    toExp x = LitE $ RationalL $ toRational x
+
+instance ToExp Integer where
+    toExp x = LitE $ IntegerL x
+
+instance ToExp String where
+    toExp x = LitE $ StringL x
+
+instance ToExp Literal where
+  toExp (Int a) = toExp a
+  toExp (String a) = toExp a
+  toExp (Float a) = toExp a
 
 generateSDL:: FilePath -> Q [Dec]
 generateSDL filePath = do
@@ -58,7 +77,7 @@ astExprToDec (Var n haskFunctions ) = do
 astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
 
     csvFileContents <- runIO $ readFile path
-    either_csv <- runIO $ parseCSV path csvFileContents
+    let either_csv = parseCSV path csvFileContents
 
     case either_csv of 
       Left pe -> fail $ "Can't parse csv: " ++ show pe
@@ -70,8 +89,6 @@ astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
             headerMapName = mkName "headerMap"  -- TODO: use reify to check ConcurrentCSV record type
             createName = mkName "createConcurrentCSV"
 
-            vectorBuilderHelper x = ListE $ map (\y -> LitE $ StringL y) x
-
         return $ FunD 
             tableName
             [Clause 
@@ -79,6 +96,14 @@ astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
                 (NormalB $ AppE (VarE createName) (ListE $ map vectorBuilderHelper contents))
                 []
             ]
+        
+    where 
+        vectorBuilderHelper:: [Literal] -> Exp
+        vectorBuilderHelper literals = ListE $ map toLiteralWorkAround literals
+
+        toLiteralWorkAround lit@(String str) = let toLitName = 'toStringLiteral in AppE (VarE toLitName) $ toExp lit
+        toLiteralWorkAround lit@(Float f) = let toLitName = 'toFloatLiteral in AppE (VarE toLitName) $ toExp lit
+        toLiteralWorkAround lit@(Int i) = let toLitName = 'toIntLiteral in AppE (VarE toLitName) $ toExp lit
 
 astExprToDec e = error ""
 
@@ -100,14 +125,14 @@ type Range = (Int, Int)
 class CsvTable t where
     getCols:: (Ord a) => [a] -> t a -> t a 
     getRows:: Range -> t a -> t a
-    getTableContents:: t a -> VectorMatrix String
+    getTableContents:: t a -> VectorMatrix Literal 
 
 data ConcurrentCSV a = ConcurrentCSV {
-    contents:: VectorMatrix String,
+    contents:: VectorMatrix Literal,
     headerMap:: M.Map a Int -- If we have Header in csv then we can map header to int 
 } deriving (Eq, Show, Typeable)
 
-createConcurrentCSV:: [[String]] -> ConcurrentCSV String
+createConcurrentCSV:: [[Literal]] -> ConcurrentCSV String
 createConcurrentCSV con = ConcurrentCSV {
     contents = V.fromList $ map V.fromList con,
     headerMap = M.empty

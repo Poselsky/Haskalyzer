@@ -1,10 +1,9 @@
 module HaskelyzerAST.Schema where
 import HaskelyzerAST.Lexer
     ( IParser,
-      DataExpr(..),
       Expr(SchemaExpr),
       VarNamePath(..),
-      identifier, reservedOp, reserved, stringLit, Schema (Schema), parens, braces )
+      identifier, reservedOp, reserved, stringLit, Schema (Schema), parens, braces, CsvDataType (..) )
 import Text.Parsec (between, optionMaybe, try, parserTrace, parserTraced)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)
@@ -23,14 +22,14 @@ import Data.Maybe (isJust, isNothing)
 
 schemaParser:: IParser Expr
 schemaParser = do
-    schema@(Schema varPath vals) <- schemaParser'
+    schema@(Schema varPath vals) <- _schemaParser
     let areAllColumnsJustOrNothing = all (\(x,_) -> isJust x || isNothing x) vals
     unless areAllColumnsJustOrNothing $ fail "If CSV file has header names, then all columns must have a name"
 
     return $ SchemaExpr schema
 
-schemaParser':: IParser Schema
-schemaParser' =
+_schemaParser:: IParser Schema
+_schemaParser =
     braces (do
         optional $ many newline
 
@@ -75,10 +74,10 @@ letVarNameParser = do
     return VarNamePath { varName = varName, filePath = fileName }
 
 
-rowTypeToDataExpr:: String -> DataExpr
-rowTypeToDataExpr "Int" = Int 0
-rowTypeToDataExpr "Float" = Float 0
-rowTypeToDataExpr "String" = String ""
+rowTypeToDataExpr:: String -> CsvDataType 
+rowTypeToDataExpr "Int" = CsvInt 
+rowTypeToDataExpr "Float" = CsvFloat 
+rowTypeToDataExpr "String" = CsvString
 rowTypeToDataExpr rowType = error $ "This datatype can't exist: " ++ rowType
 
 

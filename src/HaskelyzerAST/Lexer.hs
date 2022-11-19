@@ -1,3 +1,6 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ExistentialQuantification #-}
 module HaskelyzerAST.Lexer where
 import Control.Monad.State
 
@@ -9,6 +12,7 @@ import Text.Parsec.Prim
 import Text.Parsec.Indent (IndentParser, withPos, withBlock, IndentT)
 import Text.Parsec.Char
 import qualified Text.Parsec.Language as Tok
+import Data.Data
 
 
 haskelyzerLexer :: Tok.GenTokenParser String () (IndentT Identity)
@@ -38,9 +42,6 @@ data VarNamePath = VarNamePath
     , filePath:: FilePath
   } deriving (Show, Eq)
 
-data Schema = Schema VarNamePath [(Maybe String, DataExpr)]
-  deriving (Show, Eq, Ord)
-
 instance Ord VarNamePath where
   compare a b 
     | filepathLength a > filepathLength b = GT
@@ -48,6 +49,10 @@ instance Ord VarNamePath where
     | otherwise                           = EQ
     where
       filepathLength = length . filePath
+
+type OptionalColumnNameWithType = (Maybe String, CsvDataType)
+data Schema = Schema VarNamePath [OptionalColumnNameWithType] 
+  deriving (Show, Eq, Ord)
 
 data BinOp
   = Plus
@@ -66,20 +71,50 @@ data HaskelyzerFunction = HaskelyzerFunction Name [Name]
   deriving (Show, Ord, Eq)
 
 data Expr
-  = DataExpr DataExpr 
-  | BinOp BinOp Expr Expr
+  = 
+  BinOp BinOp Expr Expr
+  | CsvDataType CsvDataType 
   | UnaryOp UnaryOp Expr 
   | FunctionExpr HaskelyzerFunction 
   | Var Name [HaskelyzerFunction]
   | Extern Name [Expr]
   | SchemaExpr Schema 
+  | LiteralExpr Literal
   deriving (Eq, Ord, Show)
 
-data DataExpr = 
-    Float Double
-    | Int Integer
-    | String String
-    deriving (Eq, Ord, Show)
+data CsvDataType = 
+  CsvFloat 
+  | CsvInt 
+  | CsvString 
+  deriving (Show, Ord, Eq)
+
+data Literal = 
+  Float Double 
+  | Int Integer
+  | String String
+  deriving (Show, Ord, Eq)
+
+class ToLiteral a where
+  toLit:: a -> Literal
+
+instance ToLiteral String where
+  toLit a = String a
+
+instance ToLiteral Double where
+  toLit a = Float a
+
+instance ToLiteral Integer where
+  toLit a = Int a
+
+toStringLiteral :: String -> Literal
+toStringLiteral str = String str
+
+toFloatLiteral :: Double -> Literal
+toFloatLiteral d = Float d
+
+toIntLiteral :: Integer -> Literal
+toIntLiteral i = Int i
+
 
 type IParser a = IndentParser String () a
 
