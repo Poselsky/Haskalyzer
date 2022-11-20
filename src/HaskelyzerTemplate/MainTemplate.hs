@@ -13,7 +13,7 @@ import Language.Haskell.TH
       Clause(Clause),
       Name,
       Dec(FunD),
-      Body(NormalB), Lit (StringL, IntegerL, RationalL), reify )
+      Body(NormalB), Lit (StringL, IntegerL, RationalL), reify, location, Loc (loc_filename) )
 import HaskelyzerAST.Parser
 import GHC.IO.Handle (hSetBuffering, BufferMode (NoBuffering))
 import GHC.IO.Handle.FD (stdout, stderr)
@@ -28,6 +28,9 @@ import Data.Maybe
 import Data.List (intersect, intersectBy)
 import Data.Data (Typeable, typeOf)
 import qualified Data.Vector as V
+import Language.Haskell.TH.Syntax (addDependentFile)
+import System.FilePath
+import System.Directory (makeAbsolute, doesFileExist)
 
 type VectorMatrix a = V.Vector (V.Vector a)
 
@@ -50,6 +53,8 @@ instance ToExp Literal where
 
 generateSDL:: FilePath -> Q [Dec]
 generateSDL filePath = do
+    absoPathTkl <- runIO $ makeAbsolute filePath
+    addDependentFile absoPathTkl -- Any time TKL file changes, we should recompile
     runIO $ hSetBuffering stdout NoBuffering -- I want prints during compilation
     runIO $ hSetBuffering stderr NoBuffering -- I want prints during compilation
 
@@ -75,29 +80,30 @@ astExprToDec (Var n haskFunctions ) = do
         composed [] = error "Variable can't be empty"
 
 astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
+    absoCsv <- runIO $ makeAbsolute path
+    addDependentFile absoCsv
 
     csvFileContents <- runIO $ readFile path
     let either_csv = parseCSV path csvFileContents
 
-    case either_csv of 
+    case either_csv of
       Left pe -> fail $ "Can't parse csv: " ++ show pe
-      Right (CSVFile contents _) -> do 
+      Right (CSVFile contents _) -> do
 
-        let tableName = mkName var 
-            csvDataTypeName = mkName $ show 'ConcurrentCSV 
-            contentsName = mkName "contents"  -- TODO: use reify to check ConcurrentCSV record type
-            headerMapName = mkName "headerMap"  -- TODO: use reify to check ConcurrentCSV record type
-            createName = mkName "createConcurrentCSV"
+        let tableName = mkName var
+            csvDataTypeName = 'ConcurrentCSV
+            headerMapName = 'headerMap  -- TODO: use reify to check ConcurrentCSV record type
+            createName = 'createConcurrentCSV
 
-        return $ FunD 
+        return $ FunD
             tableName
-            [Clause 
+            [Clause
                 []
                 (NormalB $ AppE (VarE createName) (ListE $ map vectorBuilderHelper contents))
                 []
             ]
-        
-    where 
+
+    where
         vectorBuilderHelper:: [Literal] -> Exp
         vectorBuilderHelper literals = ListE $ map toLiteralWorkAround literals
 
@@ -123,9 +129,9 @@ haskelyzerFunctionToExpr (HaskelyzerFunction name args) = do
 
 type Range = (Int, Int)
 class CsvTable t where
-    getCols:: (Ord a) => [a] -> t a -> t a 
+    getCols:: (Ord a) => [a] -> t a -> t a
     getRows:: Range -> t a -> t a
-    getTableContents:: t a -> VectorMatrix Literal 
+    getTableContents:: t a -> VectorMatrix Literal
 
 data ConcurrentCSV a = ConcurrentCSV {
     contents:: VectorMatrix Literal,
@@ -138,18 +144,18 @@ createConcurrentCSV con = ConcurrentCSV {
     headerMap = M.empty
 }
 
-instance CsvTable ConcurrentCSV where  
-    getRows (from, to) conCsv@ConcurrentCSV{ contents = c } = 
+instance CsvTable ConcurrentCSV where
+    getRows (from, to) conCsv@ConcurrentCSV{ contents = c } =
         conCsv {
             contents = V.slice from (to - from) c
             }
 
-    getCols colNames conCsv@ConcurrentCSV{ contents = c, headerMap = m } = 
+    getCols colNames conCsv@ConcurrentCSV{ contents = c, headerMap = m } =
         conCsv {
             contents = let v_colNames = V.fromList colNames in
-                (\row -> V.map (\colName -> let index = fromJust $ M.lookup colName m in row V.! index) v_colNames) 
+                (\row -> V.map (\colName -> let index = fromJust $ M.lookup colName m in row V.! index) v_colNames)
                 c,
             headerMap = foldr M.delete m colNames
         }
-    
+
     getTableContents ConcurrentCSV { contents = c } = c

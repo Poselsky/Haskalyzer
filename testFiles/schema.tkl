@@ -1,5 +1,5 @@
 {
-    let a = "C:/Users/olegm/Desktop/Haskalyzer/testFiles/example.csv" :
-        (a,Int)
+    let a = "testfiles/example.csv" :
+        (c,Int)
         (b,Int)
 }

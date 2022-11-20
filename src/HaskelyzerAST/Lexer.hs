@@ -98,23 +98,22 @@ class ToLiteral a where
   toLit:: a -> Literal
 
 instance ToLiteral String where
-  toLit a = String a
+  toLit = String
 
 instance ToLiteral Double where
-  toLit a = Float a
+  toLit = Float
 
 instance ToLiteral Integer where
-  toLit a = Int a
+  toLit = Int
 
 toStringLiteral :: String -> Literal
-toStringLiteral str = String str
+toStringLiteral = String
 
 toFloatLiteral :: Double -> Literal
-toFloatLiteral d = Float d
+toFloatLiteral = Float
 
 toIntLiteral :: Integer -> Literal
-toIntLiteral i = Int i
-
+toIntLiteral = Int
 
 type IParser a = IndentParser String () a
 
