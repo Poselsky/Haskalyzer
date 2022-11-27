@@ -30,6 +30,7 @@ library
       HaskelyzerAST.Parser
       HaskelyzerAST.Schema
       HaskelyzerCSV.Parser
+      HaskelyzerHelpers.MatrixHelpers
       HaskelyzerTemplate.MainTemplate
       Lib
   other-modules:

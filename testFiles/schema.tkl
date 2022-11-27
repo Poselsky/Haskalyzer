@@ -1,5 +1,6 @@
 {
     let a = "testfiles/example.csv" :
         (c,Int)
-        (b,Int)
+        (b,Float)
+        (d,Int)
 }

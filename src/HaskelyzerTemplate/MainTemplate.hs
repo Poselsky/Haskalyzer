@@ -31,6 +31,7 @@ import qualified Data.Vector as V
 import Language.Haskell.TH.Syntax (addDependentFile)
 import System.FilePath
 import System.Directory (makeAbsolute, doesFileExist)
+import Data.Sequence (mapWithIndex)
 
 type VectorMatrix a = V.Vector (V.Vector a)
 
@@ -84,7 +85,7 @@ astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
     addDependentFile absoCsv
 
     csvFileContents <- runIO $ readFile path
-    let either_csv = parseCSV path csvFileContents
+    let either_csv = parseCSV path csvFileContents dataExpr
 
     case either_csv of
       Left pe -> fail $ "Can't parse csv: " ++ show pe
