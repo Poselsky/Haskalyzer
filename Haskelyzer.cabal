@@ -31,6 +31,8 @@ library
       HaskelyzerAST.Schema
       HaskelyzerCSV.Parser
       HaskelyzerHelpers.MatrixHelpers
+      HaskelyzerTemplate.ASTToHaskell
+      HaskelyzerTemplate.ConcurrentCSV
       HaskelyzerTemplate.MainTemplate
       Lib
   other-modules:
