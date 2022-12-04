@@ -32,9 +32,6 @@ line:: [OptionalColumnNameWithType] -> CSVParser [Literal]
 line columnSchema = do
     row <- sequence $ let i = init columnSchema 
         in (map (\x -> cell x >>= \y -> char ',' >> return y ) i) ++ [cell (last columnSchema)]
-    -- row <- cell _ `sepBy` char ','
-    parserTrace $ show row
-    -- row <- sepBy cell (char ',') 
     unless (length row == length columnSchema) (fail $ "There should be same number of columns as specified per: " ++ show columnSchema)
 
     return row

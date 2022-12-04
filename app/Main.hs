@@ -9,7 +9,7 @@ $(generateSDL "./testFiles/schema.tkl")
 
 main :: IO ()
 main = do
-    putStrLn $ show a
+    -- putStrLn $ show a
     -- t <- readFile "./testFiles/schema.tkl"
     -- let ast = parseToplevelP t
 

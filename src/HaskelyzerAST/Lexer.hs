@@ -32,7 +32,7 @@ haskelyzerLexer =
         Tok.caseSensitive = True
     }
     where
-        ops = ["+","*","-",";", "->" , ":", ","]
+        ops = ["+","*","-",";", "->" , ":", ",", "|"]
         names = ["let"]
 
 type Name = String
@@ -67,12 +67,13 @@ data UnaryOp
     | Exponent
     deriving (Eq, Ord, Show)
 
-data HaskelyzerFunction = HaskelyzerFunction Name [Name]
+data HaskelyzerFunction = 
+  HaskelyzerFunction Name [Name]
+  | Concurrent [HaskelyzerFunction]
   deriving (Show, Ord, Eq)
 
 data Expr
-  = 
-  BinOp BinOp Expr Expr
+  = BinOp BinOp Expr Expr
   | CsvDataType CsvDataType 
   | UnaryOp UnaryOp Expr 
   | FunctionExpr HaskelyzerFunction 

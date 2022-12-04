@@ -4,20 +4,16 @@ import HaskelyzerAST.Lexer
       Expr(SchemaExpr),
       VarNamePath(..),
       identifier, reservedOp, reserved, stringLit, Schema (Schema), parens, braces, CsvDataType (..) )
-import Text.Parsec (between, optionMaybe, try, parserTrace, parserTraced)
 import Text.Parsec.Char (char)
 import Text.Parsec.Indent (sameOrIndented, indentBraces, withBlock, block, indented, withPos, checkIndent)
 import Text.Parsec.Combinator
     ( choice, between, manyTill, optional )
 import Text.Parsec.Prim ( many )
-import Text.Parsec (spaces, newline)
-import Text.Parsec (alphaNum, endOfLine, anyChar)
+import Text.Parsec (alphaNum, endOfLine, anyChar, spaces, newline, string, optionMaybe)
 import System.FilePath (isValid)
 import Control.Monad (guard, void, unless)
 import Debug.Trace (trace)
 import Text.Parsec.Indent.Explicit (indentation)
-import Text.Parsec (space)
-import Text.Parsec (string, parserTrace)
 import Data.Maybe (isJust, isNothing)
 
 schemaParser:: IParser Expr

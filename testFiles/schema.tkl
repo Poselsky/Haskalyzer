@@ -4,3 +4,5 @@
         (b,Float)
         (d,Int)
 }
+
+let kek = sum a b | plus ok ok concurrent
