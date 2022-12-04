@@ -14,15 +14,11 @@ functionParser:: IParser HaskelyzerFunction
 functionParser = do
     functionName <- identifier
     optional spaces
-    parserTrace $ "What the fuck" ++ functionName 
     m_hasArgs <- optionMaybe $ lookAhead identifier
-    parserTrace $ show m_hasArgs
     try $ case m_hasArgs of
         Nothing -> return $ HaskelyzerFunction functionName []
         Just _ -> do
-            parserTrace "works" 
             args <- many identifier 
-            parserTrace $ show args
             optional space
             return $ HaskelyzerFunction functionName args
 
@@ -39,29 +35,23 @@ variableParser = do
 
     return $ Var name functions
 
-concurrentParser:: IParser HaskelyzerFunction
+concurrentParser:: IParser [HaskelyzerFunction] -- TODO Concurrent should have list of lists
 concurrentParser = do
-    x <- do
+    x <- withPos $ block $ do
         reserved "|"
         try whiteSp
-        parserTrace "concurrent"
-        functionParser
+        functionParser `sepBy` reservedOp "->"
 
-    return $ Concurrent [x]
+    return $ map Concurrent x
 
 functionChainedParser:: IParser [HaskelyzerFunction]
 functionChainedParser = do
     val <- lookAhead $ optionMaybe concurrentParser
-    let applyConcurrentParser = (do a <- concurrentParser; (a :) <$> functionChainedParser;)
-
+    let applyConcurrentParser = (do a <- concurrentParser; (a ++) <$> functionChainedParser;)
+    parserTrace $ show val
     case val of
         Nothing -> do
-            parserTrace "What1"
             fs <- functionParser `sepBy` reservedOp "->"
-            parserTrace "What2"
             x <- option [] applyConcurrentParser
-            parserTrace "What3"
             return $ fs++x
-        Just _ -> do
-            a <- concurrentParser
-            return [a]
+        Just _ -> applyConcurrentParser

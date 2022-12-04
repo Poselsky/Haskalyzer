@@ -5,4 +5,5 @@
         (d,Int)
 }
 
-let kek = sum a b | plus ok ok concurrent
+let kek = sum a b | plus ok ok concurrent -> kek
+                  | minus no no co
