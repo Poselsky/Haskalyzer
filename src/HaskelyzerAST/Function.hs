@@ -35,20 +35,20 @@ variableParser = do
 
     return $ Var name functions
 
-concurrentParser:: IParser [HaskelyzerFunction] -- TODO Concurrent should have list of lists
+concurrentParser:: IParser HaskelyzerFunction -- TODO Concurrent should have list of lists
 concurrentParser = do
     x <- withPos $ block $ do
         reserved "|"
         try whiteSp
         functionParser `sepBy` reservedOp "->"
 
-    return $ map Concurrent x
+    return $ Concurrent x
 
 functionChainedParser:: IParser [HaskelyzerFunction]
 functionChainedParser = do
     val <- lookAhead $ optionMaybe concurrentParser
-    let applyConcurrentParser = (do a <- concurrentParser; (a ++) <$> functionChainedParser;)
-    parserTrace $ show val
+    let applyConcurrentParser = (do a <- concurrentParser; (a :) <$> functionChainedParser;)
+    -- parserTrace $ show val
     case val of
         Nothing -> do
             fs <- functionParser `sepBy` reservedOp "->"

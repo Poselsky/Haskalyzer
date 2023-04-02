@@ -17,7 +17,7 @@ generateSDL filePath = do
     t <- runIO $ readFile filePath
     let ast = parseToplevelP t
 
-    runIO $ print ast
+    -- runIO $ print ast
     case ast of
       Right exs -> mapM astExprToDec exs
       Left pe -> error $ show pe

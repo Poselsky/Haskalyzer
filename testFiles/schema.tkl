@@ -5,5 +5,9 @@
         (d,Int)
 }
 
-let kek = sum a b | plus ok ok concurrent -> kek
-                  | minus no no co
+let kek = | plus 
+          | times   
+          | vvv 
+          | times
+          | times
+          | times

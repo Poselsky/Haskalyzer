@@ -1,9 +1,7 @@
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ExistentialQuantification #-}
 module HaskelyzerAST.Lexer where
 import Control.Monad.State
-
 import qualified Text.Parsec.Token as Tok
 import Text.Parsec.String (Parser)
 import Text.Parsec (ParsecT, SourcePos)
@@ -13,7 +11,6 @@ import Text.Parsec.Indent (IndentParser, withPos, withBlock, IndentT)
 import Text.Parsec.Char
 import qualified Text.Parsec.Language as Tok
 import Data.Data
-
 
 haskelyzerLexer :: Tok.GenTokenParser String () (IndentT Identity)
 haskelyzerLexer =
@@ -69,7 +66,7 @@ data UnaryOp
 
 data HaskelyzerFunction = 
   HaskelyzerFunction Name [Name]
-  | Concurrent [HaskelyzerFunction]
+  | Concurrent [[HaskelyzerFunction]]
   deriving (Show, Ord, Eq)
 
 data Expr

@@ -2,12 +2,17 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 module HaskelyzerTemplate.ASTToHaskell where
-import Language.Haskell.TH 
-import HaskelyzerAST.Lexer hiding (Name) 
+import Language.Haskell.TH
+import HaskelyzerAST.Lexer hiding (Name)
 import HaskelyzerCSV.Parser
 import HaskelyzerTemplate.ConcurrentCSV
 import System.Directory
 import Language.Haskell.TH.Syntax
+import Language.Haskell.Interpreter (liftIO)
+import Control.Monad (forM)
+import Data.Maybe (isJust, fromJust)
+import Data.Foldable (foldrM)
+import Control.Concurrent.Async (Concurrently(runConcurrently, Concurrently), mapConcurrently)
 
 class ToExp a where
     toExp:: a -> Exp
@@ -29,6 +34,7 @@ instance ToExp Literal where
 astExprToDec:: Expr -> Q Dec
 astExprToDec (Var n haskFunctions ) = do
     let name = mkName n
+    liftIO $ print haskFunctions
     haskFunctionsAsExp <- mapM haskelyzerFunctionToExpr haskFunctions
 
     return $ FunD name [Clause [] (NormalB $ composed haskFunctionsAsExp) []]
@@ -73,6 +79,16 @@ astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
 
 astExprToDec e = error ""
 
+composeHaskelyzerFunction:: [HaskelyzerFunction] -> Q Exp
+composeHaskelyzerFunction [] = error "Can't compose empty list"
+composeHaskelyzerFunction (f:fs) = do
+    hf <- haskelyzerFunctionToExpr f
+    foldrM helper hf fs
+
+        where
+            helper x acc =
+                let f = haskelyzerFunctionToExpr x in f >>= \a -> return $ UInfixE acc (VarE '(.)) a
+
 haskelyzerFunctionToExpr:: HaskelyzerFunction -> Q Exp
 haskelyzerFunctionToExpr (HaskelyzerFunction name args) = do
         newParameterNames <- traverse newName args
@@ -86,3 +102,36 @@ haskelyzerFunctionToExpr (HaskelyzerFunction name args) = do
             functionApplicationE:: Name -> [Name] -> Exp
             functionApplicationE functionName (n:ns)= foldr (\x acc -> AppE acc (VarE x) ) (AppE (VarE functionName) (VarE n)) ns
             functionApplicationE functionName [] = VarE functionName
+
+haskelyzerFunctionToExpr (Concurrent fs) = do
+
+    -- Add function type check here (Should be IO a)
+    -- ret <- mapM (\f -> let HaskelyzerFunction n _ = head f in lookupValueName n) fs
+
+    -- let r = map (\x -> reify <$> x) ret  
+
+    -- let t  = map fromJust $ filter isJust r 
+
+    -- infos <- sequence t
+
+    -- liftIO $ print infos
+
+    -- End: Add type check here
+
+    -- ret <- mapM (\f -> let HaskelyzerFunction n _ = head f in lookupValueName n) fs
+
+    -- let r = map (\x -> reify <$> x) ret  
+
+    -- let t  = map fromJust $ filter isJust r 
+
+    composedFunctions <- sequence $  map composeHaskelyzerFunction fs
+
+    return $ AppE (VarE 'runListConcurrently) $ ListE composedFunctions
+
+isConcurrent:: HaskelyzerFunction -> Bool
+isConcurrent (HaskelyzerFunction _ _) = False
+isConcurrent (Concurrent _) = True
+
+
+runListConcurrently:: [IO a] -> IO [a]
+runListConcurrently = mapConcurrently id 
