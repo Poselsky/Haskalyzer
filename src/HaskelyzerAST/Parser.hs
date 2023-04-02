@@ -24,17 +24,17 @@ table = [[binary "*" Times Ex.AssocLeft,
 int :: IParser Expr
 int = do
   n <- integer
-  return $ DataExpr $ Int (fromInteger n)
+  return $ LiteralExpr $ Int (fromInteger n)
 
 floating :: IParser Expr
 floating = do
   n <- float
-  return $ DataExpr $ Float n
+  return $ LiteralExpr $ Float n
 
 string:: IParser Expr
 string = do 
     stringVal <- stringLit
-    return $ DataExpr $ String stringVal
+    return $ LiteralExpr $ String stringVal
 
 expr :: IParser Expr
 expr = Ex.buildExpressionParser table factor
@@ -44,3 +44,17 @@ factor =
       try schemaParser 
       <|> try variableParser
       <|> parens factor 
+
+toplevelP :: IParser [Expr]
+toplevelP = do 
+    def <- many $ do 
+        try $ many newline
+        s <- expr 
+        try $ many newline
+        return s
+    eof
+    return def
+
+parseToplevelP :: String -> Either ParseError [Expr]
+parseToplevelP input = 
+    runIndent $ runParserT toplevelP () "<stdin>" input

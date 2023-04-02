@@ -1,9 +1,13 @@
 {
-    let a = "asda" :
-        Int
-        String
+    let a = "testfiles/example.csv" :
+        (c,Int)
+        (b,Float)
+        (d,Int)
 }
 
-let a = lel a b -> ok
-
-let b = lel
+let kek = | plus 
+          | times   
+          | vvv 
+          | times
+          | times
+          | times

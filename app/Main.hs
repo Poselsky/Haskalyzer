@@ -1,41 +1,39 @@
+{-# LANGUAGE TemplateHaskell #-}
 module Main where
+import HaskelyzerTemplate.MainTemplate
+import Control.Concurrent
 
-import HaskelyzerAST.Parser
-import Text.Parsec
-import HaskelyzerAST.Lexer
-import Text.Parsec.Indent
-import HaskelyzerAST.Schema (schemaParser)
-import qualified Text.Parsec.Token as Tok
-import System.Environment
-import Language.Haskell.Interpreter (Interpreter, loadModules)
-import HaskelyzerInterpreter.InterpreterState (runInterpreterRWS)
-import HaskelyzerAST.Function (functionParser, variableParser)
+-- a = 3
+-- lel b = b + 1
 
-toplevelP :: IParser [Expr]
-toplevelP = do 
-    def <- many $ do 
-        try $ many newline
-        s <- expr 
-        try $ many newline
-        return s
-    eof
-    return def
+sum:: Int
+sum = 10
 
-parseToplevelP :: String -> Either ParseError [Expr]
-parseToplevelP input = 
-    runIndent $ runParserT toplevelP () "<stdin>" input
+times:: IO () 
+times = do 
+    val <- myThreadId
+    print val
+    -- print "times"
 
-haskellScriptBackingFile:: FilePath -> Interpreter ()
-haskellScriptBackingFile pathToBackingFile = do
-    loadModules [pathToBackingFile]
+plus:: IO () 
+plus = print "plus"
+
+vvv:: IO () 
+vvv = do 
+    print "vvv"
+
+$(generateSDL "./testFiles/schema.tkl")
 
 main :: IO ()
 main = do
-    t <- readFile "./testFiles/schema.tkl"
-    let ast = parseToplevelP t
+    kek
+    -- putStrLn $ show a
+    -- t <- readFile "./testFiles/schema.tkl"
+    -- let ast = parseToplevelP t
 
-    print ast
+    -- print ast
 
-    case ast of Right e -> runInterpreterRWS e 
-                Left e -> return () 
+    -- case ast of Right e -> runInterpreterRWS e 
+    --             Left e -> return () 
+    -- print $ b 3
     return ()

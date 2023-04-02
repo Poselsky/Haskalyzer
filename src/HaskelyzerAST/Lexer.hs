@@ -1,6 +1,7 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ExistentialQuantification #-}
 module HaskelyzerAST.Lexer where
 import Control.Monad.State
-
 import qualified Text.Parsec.Token as Tok
 import Text.Parsec.String (Parser)
 import Text.Parsec (ParsecT, SourcePos)
@@ -9,7 +10,7 @@ import Text.Parsec.Prim
 import Text.Parsec.Indent (IndentParser, withPos, withBlock, IndentT)
 import Text.Parsec.Char
 import qualified Text.Parsec.Language as Tok
-
+import Data.Data
 
 haskelyzerLexer :: Tok.GenTokenParser String () (IndentT Identity)
 haskelyzerLexer =
@@ -28,7 +29,7 @@ haskelyzerLexer =
         Tok.caseSensitive = True
     }
     where
-        ops = ["+","*","-",";", "->" , ":"]
+        ops = ["+","*","-",";", "->" , ":", ",", "|"]
         names = ["let"]
 
 type Name = String
@@ -46,6 +47,10 @@ instance Ord VarNamePath where
     where
       filepathLength = length . filePath
 
+type OptionalColumnNameWithType = (Maybe String, CsvDataType)
+data Schema = Schema VarNamePath [OptionalColumnNameWithType] 
+  deriving (Show, Eq, Ord)
+
 data BinOp
   = Plus
   | Minus
@@ -59,24 +64,54 @@ data UnaryOp
     | Exponent
     deriving (Eq, Ord, Show)
 
-data HaskelyzerFunction = HaskelyzerFunction Name [Name]
+data HaskelyzerFunction = 
+  HaskelyzerFunction Name [Name]
+  | Concurrent [[HaskelyzerFunction]]
   deriving (Show, Ord, Eq)
 
 data Expr
-  = DataExpr DataExpr 
-  | BinOp BinOp Expr Expr
+  = BinOp BinOp Expr Expr
+  | CsvDataType CsvDataType 
   | UnaryOp UnaryOp Expr 
   | FunctionExpr HaskelyzerFunction 
   | Var Name [HaskelyzerFunction]
   | Extern Name [Expr]
-  | Schema VarNamePath [DataExpr]
+  | SchemaExpr Schema 
+  | LiteralExpr Literal
   deriving (Eq, Ord, Show)
 
-data DataExpr = 
-    Float Double
-    | Int Integer
-    | String String
-    deriving (Eq, Ord, Show)
+data CsvDataType = 
+  CsvFloat 
+  | CsvInt 
+  | CsvString 
+  deriving (Show, Ord, Eq)
+
+data Literal = 
+  Float Double 
+  | Int Integer
+  | String String
+  deriving (Show, Ord, Eq)
+
+class ToLiteral a where
+  toLit:: a -> Literal
+
+instance ToLiteral String where
+  toLit = String
+
+instance ToLiteral Double where
+  toLit = Float
+
+instance ToLiteral Integer where
+  toLit = Int
+
+toStringLiteral :: String -> Literal
+toStringLiteral = String
+
+toFloatLiteral :: Double -> Literal
+toFloatLiteral = Float
+
+toIntLiteral :: Integer -> Literal
+toIntLiteral = Int
 
 type IParser a = IndentParser String () a
 
@@ -88,6 +123,9 @@ float = Tok.float haskelyzerLexer
 
 parens :: IParser a -> IParser a
 parens = Tok.parens haskelyzerLexer
+
+braces:: IParser a -> IParser a
+braces = Tok.braces haskelyzerLexer
 
 commaSep :: IParser a -> IParser [a]
 commaSep = Tok.commaSep haskelyzerLexer
