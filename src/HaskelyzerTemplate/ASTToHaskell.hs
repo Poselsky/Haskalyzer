@@ -13,6 +13,7 @@ import Control.Monad (forM)
 import Data.Maybe (isJust, fromJust)
 import Data.Foldable (foldrM)
 import Control.Concurrent.Async (Concurrently(runConcurrently, Concurrently), mapConcurrently)
+import qualified Data.Map as Map
 
 class ToExp a where
     toExp:: a -> Exp
@@ -32,12 +33,19 @@ instance ToExp Literal where
   toExp (Float a) = toExp a
 
 astExprToDec:: Expr -> Q Dec
-astExprToDec (Var n haskFunctions ) = do
+astExprToDec (Var n args haskFunctions ) = do
     let name = mkName n
     liftIO $ print haskFunctions
-    haskFunctionsAsExp <- mapM haskelyzerFunctionToExpr haskFunctions
 
-    return $ FunD name [Clause [] (NormalB $ composed haskFunctionsAsExp) []]
+    -- generate uncapturable names which are not global
+    argsAsVarP <- mapM (\x -> do y <- newName x; return (x, y)) args
+
+    let argsMap = Map.fromList argsAsVarP
+
+    haskFunctionsAsExp <- mapM (haskelyzerFunctionToExpr argsMap) haskFunctions
+    let result = FunD name [Clause (map (VarP . snd) argsAsVarP) (NormalB $ composed haskFunctionsAsExp) []]
+    liftIO $ print $ pprint result 
+    return result
     where
         composed:: [Exp] -> Exp
         composed (fa:fb:fs) = let composeName = mkName "." in
@@ -79,23 +87,32 @@ astExprToDec (SchemaExpr (Schema (VarNamePath var path) dataExpr)) = do
 
 astExprToDec e = error ""
 
-composeHaskelyzerFunction:: [HaskelyzerFunction] -> Q Exp
-composeHaskelyzerFunction [] = error "Can't compose empty list"
-composeHaskelyzerFunction (f:fs) = do
-    hf <- haskelyzerFunctionToExpr f
+composeHaskelyzerFunction:: Map.Map String Name-> [HaskelyzerFunction] -> Q Exp
+composeHaskelyzerFunction knownArgumentsMap [] = error "Can't compose empty list"
+composeHaskelyzerFunction knownArgumentsMap (f:fs) = do
+    hf <- haskelyzerFunctionToExpr knownArgumentsMap f
     foldrM helper hf fs
 
         where
             helper x acc =
-                let f = haskelyzerFunctionToExpr x in f >>= \a -> return $ UInfixE acc (VarE '(.)) a
+                let f = haskelyzerFunctionToExpr knownArgumentsMap x in f >>= \a -> return $ UInfixE a (VarE '($)) acc
 
-haskelyzerFunctionToExpr:: HaskelyzerFunction -> Q Exp
-haskelyzerFunctionToExpr (HaskelyzerFunction name args) = do
-        newParameterNames <- traverse newName args
-        let varsP = map VarP newParameterNames
+haskelyzerFunctionToExpr:: Map.Map String Name -> HaskelyzerFunction -> Q Exp
+haskelyzerFunctionToExpr knownArgumentsMap (HaskelyzerFunction name args) = do
+        -- Get variables from local parameters, if none exist use global ones
+        createdArguments <-
+                foldrM
+                    (\arg acc -> 
+                        let val = knownArgumentsMap Map.!? arg in 
+                        if isJust val then return (fromJust val:acc) else 
+                            return (mkName arg:acc)) 
+                    [] 
+                    args
+
+        let varsP = map VarP createdArguments 
         let fName = mkName name
 
-        return ( LamE varsP $ functionApplicationE fName newParameterNames)
+        return ( functionApplicationE fName createdArguments)
         -- return (LamE varsP  )
 
         where
@@ -103,7 +120,7 @@ haskelyzerFunctionToExpr (HaskelyzerFunction name args) = do
             functionApplicationE functionName (n:ns)= foldr (\x acc -> AppE acc (VarE x) ) (AppE (VarE functionName) (VarE n)) ns
             functionApplicationE functionName [] = VarE functionName
 
-haskelyzerFunctionToExpr (Concurrent fs) = do
+haskelyzerFunctionToExpr knownArgumentsMap (Concurrent fs) = do
 
     -- Add function type check here (Should be IO a)
     -- ret <- mapM (\f -> let HaskelyzerFunction n _ = head f in lookupValueName n) fs
@@ -124,9 +141,10 @@ haskelyzerFunctionToExpr (Concurrent fs) = do
 
     -- let t  = map fromJust $ filter isJust r 
 
-    composedFunctions <- sequence $  map composeHaskelyzerFunction fs
+    composedFunctions <- mapM (composeHaskelyzerFunction knownArgumentsMap) fs
+    let result = AppE (VarE 'runListConcurrently) $ ListE composedFunctions
 
-    return $ AppE (VarE 'runListConcurrently) $ ListE composedFunctions
+    return result
 
 isConcurrent:: HaskelyzerFunction -> Bool
 isConcurrent (HaskelyzerFunction _ _) = False
@@ -134,4 +152,4 @@ isConcurrent (Concurrent _) = True
 
 
 runListConcurrently:: [IO a] -> IO [a]
-runListConcurrently = mapConcurrently id 
+runListConcurrently = mapConcurrently id

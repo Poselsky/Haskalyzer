@@ -74,7 +74,7 @@ data Expr
   | CsvDataType CsvDataType 
   | UnaryOp UnaryOp Expr 
   | FunctionExpr HaskelyzerFunction 
-  | Var Name [HaskelyzerFunction]
+  | Var Name [String] [HaskelyzerFunction]
   | Extern Name [Expr]
   | SchemaExpr Schema 
   | LiteralExpr Literal

@@ -25,17 +25,16 @@ functionParser = do
 variableParser:: IParser Expr
 variableParser = do
     reserved "let"
-    try whiteSp
-    name <- identifier
-    try whiteSp
+    name <- spaces >> identifier <* spaces
+    args <- sepBy identifier space
     reservedOp "=" >> whiteSp
 
     functions <- functionChainedParser
     guard (not $ null functions)
 
-    return $ Var name functions
+    return $ Var name args functions
 
-concurrentParser:: IParser HaskelyzerFunction -- TODO Concurrent should have list of lists
+concurrentParser:: IParser HaskelyzerFunction 
 concurrentParser = do
     x <- withPos $ block $ do
         reserved "|"

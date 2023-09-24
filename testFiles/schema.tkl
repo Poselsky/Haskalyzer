@@ -5,9 +5,5 @@
         (d,Int)
 }
 
-let kek = | plus 
-          | times   
-          | vvv 
-          | times
-          | times
-          | times
+let kek a = | plus a -> minus
+            | times a

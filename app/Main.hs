@@ -9,24 +9,28 @@ import Control.Concurrent
 sum:: Int
 sum = 10
 
-times:: IO () 
-times = do 
+times:: Int -> IO () 
+times a = do 
     val <- myThreadId
     print val
     -- print "times"
 
-plus:: IO () 
-plus = print "plus"
+plus:: Int -> Int
+plus a = a + 4
 
-vvv:: IO () 
-vvv = do 
-    print "vvv"
+minus:: Int -> IO ()
+minus v = do 
+    print v
+
+vvv:: Int -> IO () 
+vvv _ = do 
+    print "ok"
 
 $(generateSDL "./testFiles/schema.tkl")
 
 main :: IO ()
 main = do
-    kek
+    kek 4
     -- putStrLn $ show a
     -- t <- readFile "./testFiles/schema.tkl"
     -- let ast = parseToplevelP t
