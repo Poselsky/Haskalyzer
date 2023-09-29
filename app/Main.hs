@@ -26,7 +26,7 @@ vvv:: Int -> IO ()
 vvv _ = do 
     print "ok"
 
-$(generateSDL "./testFiles/schema.tkl")
+$(generateHaskalyzer "./testFiles/schema.tkl")
 
 main :: IO ()
 main = do

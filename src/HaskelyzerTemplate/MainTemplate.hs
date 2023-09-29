@@ -7,8 +7,8 @@ import HaskelyzerAST.Parser
 import HaskelyzerTemplate.ConcurrentCSV
 import HaskelyzerTemplate.ASTToHaskell
 
-generateSDL:: FilePath -> Q [Dec]
-generateSDL filePath = do
+generateHaskalyzer:: FilePath -> Q [Dec]
+generateHaskalyzer filePath = do
     absoPathTkl <- runIO $ makeAbsolute filePath
     addDependentFile absoPathTkl -- Any time TKL file changes, we should recompile
     runIO $ hSetBuffering stdout NoBuffering -- I want prints during compilation
